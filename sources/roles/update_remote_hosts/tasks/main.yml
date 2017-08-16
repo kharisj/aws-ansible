@@ -1,0 +1,3 @@
+---
+- name: Update hosts files
+  copy: src=/etc/ansible/oc-system-hosts dest=/etc/hosts

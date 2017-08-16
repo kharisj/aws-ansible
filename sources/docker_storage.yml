@@ -1,0 +1,14 @@
+---
+- hosts: oc_cluster
+  vars_files:
+      - ./vars/vm_details.yml
+  become: true
+  roles:
+    - docker_vg
+    - docker_storage_setup
+- hosts: oc_store
+  vars_files:
+      - ./vars/vm_details.yml
+  become: true
+  roles:
+    - ceph_disk

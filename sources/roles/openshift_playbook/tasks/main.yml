@@ -1,0 +1,28 @@
+---
+- name: Check Git installation
+  yum:
+    name: 'git'
+    state: 'present'
+
+- name: Check Playbook directory
+  file:
+    path: /opt/openshift-ansible
+    state: directory
+
+- name: Git Clone for Openshift playbook
+  git:
+    repo: 'https://github.com/openshift/openshift-ansible.git'
+    dest: /opt/openshift-ansible
+#    ignore_error: true
+- name: Replacing oc-hosts to ansible host
+  copy:
+    src: '/etc/ansible/oc-hosts'
+    dest: '/etc/ansible/hosts'
+    backup: yes
+- name: Refresh inventory
+  meta: refresh_inventory
+- name: Test Connection
+  shell: ansible all -m ping
+#- name: Deploying Openshift
+#  shell: ansible-playbook -i /etc/ansible/oc-hosts /opt/openshift-ansible/playbooks/byo/config.yml > /opt/openshift.log
+#  shell: ansible-playbook -i /etc/ansible/oc-hosts /opt/openshift-ansible/playbooks/byo/config.yml

@@ -1,0 +1,15 @@
+---
+## sources/roles/docker_storage_setup/tasks/main.yml
+- name: Stop Docker Service
+  service: name=docker state=stopped
+- name: Check docker.sock
+  file: name=/var/run/docker.sock state=touch
+- name: Add docker storage configuration
+  lineinfile: line={{ item }} path=/etc/sysconfig/docker-storage-setup
+  with_items:
+   - 'VG=docker-vg'
+   - 'SETUP_LVM_THIN_POOL=yes'
+- name: Running Docker Storage Setup shell
+  shell: docker-storage-setup
+- name: Start Docker Service
+  service: name=docker state=started

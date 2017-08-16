@@ -1,0 +1,11 @@
+---
+- name: Fixing DNS
+  template: src=resolv.conf.j2 dest=/etc/resolv.conf
+- name: installing lvm2
+  yum: name={{ item }} state=present
+  with_items:
+    - system-storage-manager
+    - lvm2
+    - sg3_utils
+- name: creating new LVM volume group
+  lvg: vg=docker-vg pvs={{ additional_device }} state=present

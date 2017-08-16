@@ -1,0 +1,91 @@
+---
+### Class and Role cannot contain '-' or '_' and others reserved string for ansible group and linux hostname ###
+owner: "Kharis" #Modify this with yours
+class: "Openshift" #Modify this with yours
+########################################## For Openshift deployment #############################################
+cluster_name: "oc.kharis" #Modify this with yours
+openshift_deployment: true
+role:
+  masters: "ocmaster"
+  nodes: "ocnode"
+  etcd: "ocetcd"
+  lb: "ocproxy"
+  infras: "ocinfra"
+  store: "ocstore"
+########################################## Required for Launch-VM ##############################################
+launch_vms:
+ - keyname: "{{ region.keyname }}"
+   instancetype: "t2.xlarge"
+   image: "{{ region.centos7.code }}"
+   subnet: "{{ region.oc_subnet }}"
+   role: "{{ role.masters }}"
+   owner: "{{ owner }}"
+   class: "{{ class }}"
+   region: "{{ region.code }}"
+   count: "3"
+ - keyname: "{{ region.keyname }}"
+   instancetype: "t2.xlarge"
+   image: "{{ region.centos7.code }}"
+   subnet: "{{ region.oc_subnet }}"
+   role: "{{ role.nodes }}"
+   owner: "{{ owner }}"
+   class: "{{ class }}"
+   region: "{{ region.code }}"
+   count: "3"
+ - keyname: "{{ region.keyname }}"
+   instancetype: "t2.xlarge"
+   image: "{{ region.centos7.code }}"
+   subnet: "{{ region.oc_subnet }}"
+   role: "{{ role.infras }}"
+   owner: "{{ owner }}"
+   class: "{{ class }}"
+   region: "{{ region.code }}"
+   count: "2"
+ - keyname: "{{ region.keyname }}"
+   instancetype: "t2.large"
+   image: "{{ region.centos7.code }}"
+   subnet: "{{ region.oc_subnet }}"
+   role: "{{ role.etcd }}"
+   owner: "{{ owner }}"
+   class: "{{ class }}"
+   region: "{{ region.code }}"
+   count: "3"
+ - keyname: "{{ region.keyname }}"
+   instancetype: "t2.large"
+   image: "{{ region.centos7.code }}"
+   subnet: "{{ region.oc_subnet }}"
+   role: "{{ role.store }}"
+   owner: "{{ owner }}"
+   class: "{{ class }}"
+   region: "{{ region.code }}"
+   count: "1"
+ - keyname: "{{ region.keyname }}"
+   instancetype: "t2.large"
+   image: "{{ region.centos7.code }}"
+   subnet: "{{ region.oc_subnet }}"
+   role: "{{ role.lb }}"
+   owner: "{{ owner }}"
+   class: "{{ class }}"
+   region: "{{ region.code }}"
+   count: "1"
+########### Disk format #########################
+add_disk: true
+additional_disk: "/dev/sdf"
+additional_device: "/dev/xvdf" #related with additional_disk
+mount_path: "/opt/ceph-server" # for ceph server
+format: "xfs" # for ceph server
+vol_size: "50" #GB
+########### Ceph Servers Configuration #######################
+ceph_usage: true
+disk_additional_disks:
+ - disk: "{{ additional_device }}"
+   fstype: "{{ format }}"
+   mount_options: defaults
+   mount: "{{ mount_path }}"
+   user: root
+   group: root
+   disable_periodic_fsck: false
+disk_package_use: auto
+additional_fs_utils:
+  - xfsprogs     # package for mkfs.xfs on RedHat / Ubuntu
+  - btrfs-progs  # package for mkfs.btrfs on CentOS / Debian

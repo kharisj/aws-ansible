@@ -1,0 +1,9 @@
+---
+- hosts: masters
+  become: true
+  vars_files:
+      - ./vars/vm_details.yml
+      - ./vars/openshift.yml
+      - ./vars/templates.yml
+  roles:
+    - openshift_add_users

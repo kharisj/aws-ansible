@@ -1,0 +1,27 @@
+---
+- name: Shell yum clean all
+  shell: yum clean all
+  when: yum_package
+
+- name: Upgrade Kernel
+  yum: name=* state=latest
+  when: yum_package
+
+- name: Install prerequisites[epel]
+  yum: name={{ item }} state=present
+  with_items: "{{ prerequisites_packages.epel }}"
+  when: epel_package and yum_package
+
+- name: Install prerequisites[yum]
+  yum: name={{ item }} state=present
+  with_items: "{{ prerequisites_packages.yum }}"
+  when: yum_package
+
+- name: Upgrade pip
+  shell: pip install --upgrade pip
+  when: pip_package
+
+- name: Install prerequisites[pip]
+  pip: name={{ item }} state=latest
+  with_items: "{{ prerequisites_packages.pip }}"
+  when: pip_package

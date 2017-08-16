@@ -1,0 +1,15 @@
+---
+- hosts: localhost
+  vars_files:
+      - ./vars/common.yml
+      - ./vars/vm_details.yml
+      - ./vars/templates.yml
+  roles:
+    - startup_domain
+- hosts: "{{ class }}"
+  vars_files:
+      - ./vars/common.yml
+      - ./vars/vm_details.yml
+  become: true
+  roles:
+    - update_remote_hosts

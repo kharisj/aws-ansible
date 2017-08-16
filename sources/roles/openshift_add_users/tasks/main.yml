@@ -1,0 +1,12 @@
+---
+- name: Add Openshift Users
+  shell: htpasswd -b /etc/origin/master/htpasswd {{ item.user }} {{ item.password }}
+  with_items: "{{ openshift_users }}"
+  when: openshift
+- name: Add OC command
+  template:
+    src: "{{ templates_path }}bashrc"
+    dest: /etc/bashrc
+  when: openshift
+- meta: reset_connection
+#  shell: echo "export PATH=$PATH:$(whereis oc|cut -f 2 -d ':')" >> /etc/bashrc

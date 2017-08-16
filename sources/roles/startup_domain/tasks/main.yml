@@ -1,0 +1,69 @@
+---
+- name: Gathering Information
+  ec2_remote_facts:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    region: "{{ region.code }}"
+    filters:
+      instance-state-name: stopped
+      tag:Class : "{{ class }}"
+      tag:Owner : "{{ owner }}"
+  register: stopped
+
+- name: Starting up VM
+  ec2:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    instance_ids: "{{ item.id }}"
+    region: "{{ region.code }}"
+    state: running
+    wait: True
+  with_items: "{{ stopped.instances }}"
+
+- name: Query Information
+  ec2_remote_facts:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    region: "{{ region.code }}"
+    filters:
+      instance-id: "{{ item.id }}"
+  with_items: "{{ stopped.instances }}"
+  register: registered
+
+- file:
+    path: "/etc/ansible"
+    state: directory
+    mode: 0755
+
+- name: Define Ansible(OC) Hosts Files
+  template:
+    src: "{{ oc_hosts.start}}"
+    dest: /etc/ansible/oc-hosts
+  when: openshift_deployment
+
+- name: Define Ansible Hosts Files
+  template:
+    src: "{{ ansible_hosts.start}}"
+    dest: /etc/ansible/hosts
+
+- name: Ignore Ansible SSH authenticity checking
+  template:
+    src: "{{ ansible_cfg }}"
+    dest: /etc/ansible/ansible.cfg
+
+- name: Define System Hosts Files
+  template:
+    src: "{{ system_hosts.start}}"
+    dest: /etc/hosts
+- name: Define Remote System Hosts Files
+  template:
+    src: "{{ remote_hosts.start}}"
+    dest: /etc/ansible/oc-system-hosts
+
+- name: Waiting for SSH
+  wait_for:
+    host: "{{ item.1.public_ip_address }}"
+    port: 22
+  with_subelements:
+    - "{{ registered.results }}"
+    - "instances"

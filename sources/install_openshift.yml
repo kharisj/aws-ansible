@@ -1,0 +1,8 @@
+---
+- hosts: localhost
+  vars_files:
+      - ./vars/vm_details.yml
+  become: true
+  roles:
+    - openshift_playbook
+- include: /opt/openshift-ansible/playbooks/byo/config.yml

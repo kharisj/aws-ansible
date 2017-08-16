@@ -1,0 +1,11 @@
+---
+- hosts: localhost
+  vars_files:
+      - ./vars/common.yml
+      - ./vars/vm_details.yml
+      - ./vars/templates.yml
+  roles:
+    - launch_vm
+#  tasks:
+#    - name: Waiting for updated hosts
+#      wait_for: delay=150

@@ -1,0 +1,59 @@
+---
+- name: Gathering Information
+  ec2_remote_facts:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    region: "{{ region.code }}"
+    filters:
+      instance-state-name: running
+      tag:Class : "{{ class }}"
+      tag:Owner : "{{ owner }}"
+  register: invent
+
+- name: Query Information
+  ec2_remote_facts:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    region: "{{ region.code }}"
+    filters:
+      instance-id: "{{ item.id }}"
+  with_items: "{{ invent.instances }}"
+  register: registered
+
+- file:
+    path: "/etc/ansible"
+    state: directory
+    mode: 0755
+
+- name: Define Ansible(OC) Hosts Files
+  template:
+    src: "{{ oc_hosts.inventory }}"
+    dest: /etc/ansible/oc-hosts
+  when: openshift_deployment
+
+- name: Define Ansible Hosts Files
+  template:
+    src: "{{ ansible_hosts.inventory }}"
+    dest: /etc/ansible/hosts
+
+- name: Ignore Ansible SSH authenticity checking
+  template:
+    src: "{{ ansible_cfg }}"
+    dest: /etc/ansible/ansible.cfg
+
+- name: Define System Hosts Files
+  template:
+    src: "{{ system_hosts.inventory }}"
+    dest: /etc/hosts
+- name: Define Remote System Hosts Files
+  template:
+    src: "{{ remote_hosts.inventory }}"
+    dest: /etc/ansible/oc-system-hosts
+
+- name: Waiting for SSH
+  wait_for:
+    host: "{{ item.1.public_ip_address }}"
+    port: 22
+  with_subelements:
+    - "{{ registered.results }}"
+    - "instances"

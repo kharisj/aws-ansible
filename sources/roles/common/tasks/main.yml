@@ -1,0 +1,28 @@
+---
+- name: Disable SELinux
+  template:
+    src: "{{ selinux_cfg }}"
+    dest: /etc/sysconfig/selinux
+
+- name: Change sudo tty
+  file: path=/etc/sudoers owner=root group=root mode=0600
+- lineinfile: regexp='^Defaults    requiretty' line='#Defaults    requiretty' path=/etc/sudoers
+
+- name: Configure /etc/sysconfig/network HOSTNAME
+  template:
+    src: "{{ network_cfg }}"
+    dest: /etc/sysconfig/network
+
+- name: Set Hostname
+  shell: hostname {{ inventory_hostname }} && echo {{ inventory_hostname }} > /etc/hostname
+
+- meta: reset_connection
+
+- name: Diagnostic Hostname
+  debug: msg={{ ansible_hostname }}
+
+- name: Restart
+  command: /sbin/shutdown -r +1
+  async: 0
+  poll: 0
+  ignore_errors: true

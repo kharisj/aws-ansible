@@ -1,0 +1,23 @@
+---
+prerequisites_packages: "{{ openshift_package }}"
+openshift_package:
+  epel:
+    - http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-10.noarch.rpm
+  yum:
+    - wget
+    - git
+    - gcc
+    - libffi-devel
+    - python-devel
+    - openssl-devel
+    - python2-pip
+    - docker
+    - net-tools
+    - bind-utils
+  pip:
+    - cryptography
+    - passlib
+    - pyOpenSSL
+yum_package: true
+epel_package: true
+pip_package: true

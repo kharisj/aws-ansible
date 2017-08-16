@@ -1,0 +1,77 @@
+---
+## sources/roles/launch_vm/tasks/main.yml
+- name: Launch VM
+  ec2:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    key_name: "{{ item.keyname }}" # mykey # key?
+    instance_type: "{{ item.instancetype }}" # type
+    image: "{{ item.image }}"
+    wait: yes
+    wait_timeout: 500
+    count: "{{ item.count }}"# count ?
+    vpc_subnet_id: "{{ item.subnet }}" # subnet ?
+    instance_tags:
+          Role: "{{ item.role }}"
+          Owner: "{{ item.owner }}"
+          Class: "{{ item.class }}"
+    region: "{{ item.region }}"
+  register: registered
+  with_items: "{{ launch_vms }}"
+
+- ec2_vol:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    instance: "{{ item.1.id }}"
+    volume_size: "{{ vol_size }}"
+    region: "{{ region.code }}"
+    device_name: "{{ additional_disk }}"
+#     device_name: /dev/sdf
+    delete_on_termination: yes
+  with_subelements:
+    - "{{ registered.results }}"
+    - "instances"
+  when: add_disk
+
+- file:
+    path: "/etc/ansible"
+    state: directory
+    mode: 0755
+
+- name: Define Ansible(OC) Hosts Files
+  template:
+    src: "{{ oc_hosts.launch }}"
+    dest: /etc/ansible/oc-hosts
+  when: openshift_deployment
+
+- name: Define Ansible Hosts Files
+  template:
+    src: "{{ ansible_hosts.launch }}"
+    dest: /etc/ansible/hosts
+- meta: refresh_inventory
+
+
+- name: Ignore Ansible SSH authenticity checking
+  template:
+    src: "{{ ansible_cfg }}"
+    dest: /etc/ansible/ansible.cfg
+
+- name: Define System Hosts Files
+  template:
+    src: "{{ system_hosts.launch }}"
+    dest: /etc/hosts
+- meta: reset_connection
+#- name: Test Connection
+#  shell: ansible all -m ping
+- name: Define Remote System Hosts Files
+  template:
+    src: "{{ remote_hosts.launch }}"
+    dest: /etc/ansible/oc-system-hosts
+
+- name: Waiting for SSH
+  wait_for:
+    host: "{{ item.1.public_ip }}"
+    port: 22
+  with_subelements:
+      - "{{ registered.results }}"
+      - "instances"

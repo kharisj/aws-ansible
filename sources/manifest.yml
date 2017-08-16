@@ -1,0 +1,7 @@
+---
+# file: site.yml
+- include: launch.yml
+- include: prerequisites.yml
+- include: docker_storage.yml
+- include: install_openshift.yml
+- include: openshift_add_users.yml

@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+{% if registered is defined and role is defined %}
+{% for item in registered.results %}
+{% for object in item.instances %}
+{% if object.tags.Role == role.lb and object.ami_launch_index == '0' %}
+{{ object.private_ip_address }}  {{ object.tags.Role }}{{ object.ami_launch_index }} {{ object.tags.Role }}{{ object.ami_launch_index }}.{{ cluster_name }} {{ object.private_dns_name }} {{ cluster_name }}
+{% elif object.tags.Role != role.lb or object.ami_launch_index != '0' %}
+{{ object.private_ip_address }}  {{ object.tags.Role }}{{ object.ami_launch_index }} {{ object.tags.Role }}{{ object.ami_launch_index }}.{{ cluster_name }} {{ object.private_dns_name }}
+{% endif %}
+{% endfor %}
+{% endfor %}
+{% endif %}

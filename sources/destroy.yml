@@ -1,0 +1,8 @@
+---
+- hosts: localhost
+  vars_files:
+      - ./vars/common.yml
+      - ./vars/vm_details.yml
+  roles:
+    - destroy_domain
+    - aws_delete_volume

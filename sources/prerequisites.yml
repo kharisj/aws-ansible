@@ -1,0 +1,10 @@
+---
+- hosts: "{{ class }}"
+  vars_files:
+      - ./vars/common.yml
+      - ./vars/vm_details.yml
+      - ./vars/prerequisites.yml
+  become: true
+  roles:
+    - prerequisites
+- include: common_remote.yml

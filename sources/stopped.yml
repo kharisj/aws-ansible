@@ -1,0 +1,7 @@
+---
+- hosts: localhost
+  vars_files:
+      - ./vars/common.yml
+      - ./vars/vm_details.yml
+  roles:
+    - stopping_domain

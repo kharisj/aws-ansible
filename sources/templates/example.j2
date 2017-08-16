@@ -1,0 +1,39 @@
+[{{ class }}:vars]
+ansible_ssh_user={{ region.centos7.user }}
+ansible_ssh_private_key_file={{ region.keyfile }}
+[{{ class }}:children]
+{% if launch_vms is defined %}
+{% for item in launch_vms %}
+{{ item.role }}
+{% endfor %}
+{% endif %}
+
+{% if openshift_deployment == true %}
+[oc_cluster:vars]
+ansible_ssh_user={{ region.centos7.user }}
+ansible_ssh_private_key_file={{ region.keyfile }}
+[oc_cluster:children]
+{% if launch_vms is defined %}
+{% for item in launch_vms %}
+{% if item.role != role.store %}
+{{ item.role }}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endif %}
+{% if registered is defined and launch_vms is defined %}
+{% for item1 in launch_vms %}
+
+[{{ item1.role }}:vars]
+ansible_ssh_user={{ region.centos7.user }}
+ansible_ssh_private_key_file={{ region.keyfile }}
+[{{ item1.role }}]
+{% for item2 in registered.results %}
+{% for object in item2.instances %}
+{% if object.tags.Role == item1.role %}
+{{ object.tags.Role }}{{ object.ami_launch_index }}.{{ cluster_name }}
+{% endif %}
+{% endfor %}
+{% endfor %}
+{% endfor %}
+{% endif %}

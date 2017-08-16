@@ -1,0 +1,23 @@
+---
+templates_path: "../../../templates/"
+########################################################
+system_hosts:
+ launch: "{{ templates_path }}system-hosts.j2"
+ start: "{{ templates_path }}system-hosts-2.j2"
+ inventory: "{{ templates_path }}system-hosts-2.j2"
+remote_hosts:
+ launch: "{{ templates_path }}oc-system-hosts.j2"
+ start: "{{ templates_path }}oc-system-hosts-2.j2"
+ inventory: "{{ templates_path }}oc-system-hosts-2.j2"
+oc_hosts:
+ launch: "{{ templates_path }}oc-hosts.j2"
+ start: "{{ templates_path }}oc-hosts.j2"
+ inventory: "{{ templates_path }}oc-hosts.j2"
+ansible_hosts:
+ launch: "{{ templates_path }}example.j2"
+ start: "{{ templates_path }}example.j2"
+ inventory: "{{ templates_path }}example.j2"
+#########################################################
+ansible_cfg: "{{ templates_path }}ansible-cfg.j2"
+selinux_cfg: "{{ templates_path }}selinux.j2"
+network_cfg: "{{ templates_path }}network-cfg.j2"

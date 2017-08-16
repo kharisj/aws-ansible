@@ -1,0 +1,23 @@
+---
+- name: Gathering volume information
+  ec2_vol_facts:
+    region: "{{ region.code }}"
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    filters:
+      attachment.status: "Detached"
+      tag:Owner : "{{ owner }}"
+  register: aws_vol
+
+#- name: Debug Volumes
+#  debug:
+#    msg: "{{ aws_vol }}"
+
+- name: Delete Volumes
+  ec2_vol:
+    id: "{{ item.id }}"
+    state: absent
+    region: "{{ region.code }}"
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+  with_items: "{{ aws_vol.volumes }}"
